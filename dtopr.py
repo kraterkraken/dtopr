@@ -59,7 +59,6 @@ def main():
     icon = "Icon=" + input("Enter the full path of the app's icon: ")
     catstring = "Categories=" + get_category_selections()
 
-
     # write to the file
     f.write("[Desktop Entry]\n")
     f.write("Encoding=UTF-8\n")
