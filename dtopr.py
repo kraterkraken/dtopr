@@ -1,5 +1,12 @@
 import os
 
+def get_terminal_value():
+    values= {"Y": "true", "YES": "true", "N": "false", "NO": "false"}
+    while True:
+        response = input("Will this be a terminal app (y/n)? ").upper()
+        if response in values.keys():
+            return values[response]
+
 def get_category_selections():
     categories = ["<End Selection>", "AudioVideo", "Development", "Education", "Game", "Graphics",
                     "Network", "Office", "Science", "Settings", "System", "Utility"]
@@ -57,6 +64,7 @@ def main():
     exec = "Exec=" + input("Enter the app's commandline command, including path and arguments: ")
     path = "Path=" + input("Enter the working directory of the app: ")
     icon = "Icon=" + input("Enter the full path of the app's icon: ")
+    terminal = "Terminal=" + get_terminal_value()
     catstring = "Categories=" + get_category_selections()
 
     # write to the file
@@ -64,7 +72,7 @@ def main():
     f.write("Encoding=UTF-8\n")
     f.write("Version=1.0\n")
     f.write("Type=Application\n")
-    f.write("Terminal=false\n")
+    f.write(terminal + "\n")
     f.write(appname + "\n")
     f.write(exec + "\n")
     f.write(path + "\n")
