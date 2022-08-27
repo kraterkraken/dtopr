@@ -1,5 +1,5 @@
 # dtopr
-*dtopr* - a command line tool in python3 for maintaining Linux *.desktop files
+**dtopr** - a command line tool in python3 for maintaining Linux *.desktop files
 
 Background
 ----------
