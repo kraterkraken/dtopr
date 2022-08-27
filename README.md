@@ -1,5 +1,5 @@
 # dtopr
-**dtopr** - a command line tool in python3 for maintaining Linux *.desktop files
+A command line tool in python3 for maintaining Linux *.desktop files
 
 Background
 ----------
@@ -14,6 +14,6 @@ a *.desktop file for a given application and (optionally) put it in the correct
 Linux system directory for it to appear in the Applications menu.
 
 The program works by repeatedly prompting the user for the main
-*.desktop file entries that are required for the Applications menu to work.  
-After the user has entered the required information, dtopr creates the *.desktop
+*.desktop file entries that are required for the Applications menu to work. After
+the user has entered the required information, dtopr creates the *.desktop
 file and offers to move it to the system folder where it needs to go.
