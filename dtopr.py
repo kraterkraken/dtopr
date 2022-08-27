@@ -1,39 +1,88 @@
-import os
+#!/usr/bin/python3
 
-def get_terminal_value():
-    values= {"Y": "true", "YES": "true", "N": "false", "NO": "false"}
+# -------------------------------------------------------------------------------
+# dtopr.py
+# program to install an application desktop file so that it appears in the menus
+# -------------------------------------------------------------------------------
+
+import os
+import readline
+
+categories = ["<End Selection>", "AudioVideo", "Development", "Education", "Game", "Graphics",
+                "Network", "Office", "Science", "Settings", "System", "Utility"]
+
+def make_title():
+    os.system("clear")
+    print("***********************************************")
+    print("  WELCOME TO DTOPR: APP INSTALLATION UTILITY!")
+    print("***********************************************\n")
+
+def dtopr_input(prompt="", errmsg=""):
+    make_title()
+    return input(prompt + errmsg)
+
+def get_outfile(prompt):
+    errmsg = ""
     while True:
-        response = input("Will this be a terminal app (y/n)? ").upper()
+        fname = dtopr_input(prompt, errmsg)
+        fname += ".desktop"
+
+        # handle existing file
+        if os.path.exists(fname):
+            yesno = input(f"A file named {fname} already exists. Overwrite? ")
+            if not yesno.upper() in ["Y", "YES"]:
+                continue
+
+        # try to create the file
+        try:
+            f = open(fname, 'w')
+        except:
+            print(f"Error creating file {fname}.  Exitting.")
+            exit()
+
+        return f
+
+def get_path(prompt):
+    errmsg = ""
+    while True:
+        retval = os.path.abspath((dtopr_input(prompt, errmsg)))
+        if os.path.exists(retval.split()[0]):
+            return retval
+        else:
+            errmsg = f"{retval} does not exist.\n"
+
+def get_bool(prompt):
+    values = {"Y": "true", "YES": "true", "N": "false", "NO": "false"}
+    while True:
+        response = dtopr_input(prompt).upper()
         if response in values.keys():
             return values[response]
 
-def get_category_selections():
-    categories = ["<End Selection>", "AudioVideo", "Development", "Education", "Game", "Graphics",
-                    "Network", "Office", "Science", "Settings", "System", "Utility"]
+def get_multi_selection(prompt="", choicelist=[]):
     selecteds = []
     while True:
         # prompt for input
-        print("Select one or more categories.  Select 0 when done.")
-        for i, category in enumerate(categories):
+        make_title()
+        print(prompt)
+        for i, item in enumerate(choicelist):
             asterisk = ""
             if i in selecteds:
                 asterisk = "* "
-            print(f"\t({i}) {asterisk}{category}")
+            print(f"\t({i}) {asterisk}{item}")
 
         # sanity checks on the input
         try:
             curr_choice = int(input())
         except ValueError:
             curr_choice = -1
-        if curr_choice < 0 or curr_choice > len(categories)-1:
-            print("You did not select an item in the list.")
+        if curr_choice < 0 or curr_choice > len(choicelist)-1:
             continue
 
         # quit the loop and return the category string if user entered 0
         if curr_choice == 0:
             retval = ""
             for i in selecteds:
-                retval += categories[i] + ";"
+                retval += choicelist[i] + ";"
             return retval
 
         # handle selection or de-selection of the item entered
@@ -44,45 +93,35 @@ def get_category_selections():
         else:
             selecteds.append(curr_choice)
 
-        print(f"You {un}selected '({curr_choice}) {categories[curr_choice]}'")
+        print(f"You {un}selected '({curr_choice}) {choicelist[curr_choice]}'")
 
 def main():
-    print("Creating a new *.desktop file!")
-    fname = input("Enter the file name (just the part before .desktop): ")
-    fname += ".desktop"
-    # try to create the file ... for now, exist if it exists
-    try:
-        f = open(fname, 'x')
-    except FileExistsError:
-        print("A file with that name already exists.  Exitting.")
-        exit()
-    except:
-        print("Error creating file.  Exitting.")
-        exit()
 
-    appname = "Name=" + input("Enter the name of the app as you'd like it to appear in the menus: ")
-    exec = "Exec=" + input("Enter the app's commandline command, including path and arguments: ")
-    path = "Path=" + input("Enter the working directory of the app: ")
-    icon = "Icon=" + input("Enter the full path of the app's icon: ")
-    terminal = "Terminal=" + get_terminal_value()
-    catstring = "Categories=" + get_category_selections()
+    f = get_outfile("Enter the desktop file name (just the part before .desktop):\n")
+
+    app_name = "Name=" + dtopr_input("Enter the name of the app as you'd like it to appear in the menus:\n")
+    app_exec = "Exec=" + get_path("Enter the app's commandline command, including arguments:\n")
+    app_path = "Path=" + get_path("Enter the working directory of the app (blank for current directory):\n")
+    app_icon = "Icon=" + get_path("Enter the filename of the app's icon:\n")
+    app_terminal = "Terminal=" + get_bool("Will this be a terminal app (y/n)?\n")
+    app_categories = "Categories=" + get_multi_selection("Select one or more categories.  Select 0 when done.", categories)
 
     # write to the file
     f.write("[Desktop Entry]\n")
     f.write("Encoding=UTF-8\n")
     f.write("Version=1.0\n")
     f.write("Type=Application\n")
-    f.write(terminal + "\n")
-    f.write(appname + "\n")
-    f.write(exec + "\n")
-    f.write(path + "\n")
-    f.write(icon + "\n")
-    f.write(catstring + "\n")
+    f.write(app_terminal + "\n")
+    f.write(app_name + "\n")
+    f.write(app_exec + "\n")
+    f.write(app_path + "\n")
+    f.write(app_icon + "\n")
+    f.write(app_categories + "\n")
     f.close()
 
     # offer to move the file to the proper linux system folder
     system_path = "/usr/share/applications/"
-    confirm_move =input("Would you like to move the file to the system directory? ")
+    confirm_move =dtopr_input("Would you like to move the file to the system directory?\n")
     if confirm_move.upper() in ("Y", "YES"):
         print("Moving the file...")
         os.system(f"mv -i --backup=numbered {fname} {system_path}{fname}")
