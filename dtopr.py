@@ -18,10 +18,7 @@ def handle_ctrl_c(signal_number, stack_frame):
     # the ctrl-c termination of the program, but issuing a call to input()
     # here causes the program to end ungracefully with a python callstack
     # dump.  So I'm just exitting.
-    input()
     sys.exit(1)
-
-signal.signal(signal.SIGINT, handle_ctrl_c)
 
 def make_title():
     os.system("clear")
@@ -108,6 +105,7 @@ def get_multi_selection(prompt="", choicelist=[]):
         print(f"You {un}selected '({curr_choice}) {choicelist[curr_choice]}'")
 
 def main():
+    signal.signal(signal.SIGINT, handle_ctrl_c)
 
     (f,fname) = get_outfile("Enter the desktop file name (just the part before .desktop):\n")
 
