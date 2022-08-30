@@ -94,16 +94,6 @@ def get_multi_selection(prompt="", choicelist=[]):
                 retval += choicelist[i] + ";"
             return retval
 
-        # handle selection or de-selection of the item entered
-        un = ""
-        if curr_choice in selecteds:
-            un = "un-"
-            selecteds.remove(curr_choice)
-        else:
-            selecteds.append(curr_choice)
-
-        print(f"You {un}selected '({curr_choice}) {choicelist[curr_choice]}'")
-
 def main():
     signal.signal(signal.SIGINT, handle_ctrl_c)
 
