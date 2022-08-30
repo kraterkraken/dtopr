@@ -40,7 +40,7 @@ def get_outfile(prompt):
             print(f"Error creating file {fname}.  Exitting.")
             exit()
 
-        return f
+        return (f, fname)
 
 def get_path(prompt):
     errmsg = ""
@@ -97,7 +97,7 @@ def get_multi_selection(prompt="", choicelist=[]):
 
 def main():
 
-    f = get_outfile("Enter the desktop file name (just the part before .desktop):\n")
+    (f,fname) = get_outfile("Enter the desktop file name (just the part before .desktop):\n")
 
     app_name = "Name=" + dtopr_input("Enter the name of the app as you'd like it to appear in the menus:\n")
     app_exec = "Exec=" + get_path("Enter the app's commandline command, including arguments:\n")
@@ -124,8 +124,9 @@ def main():
     confirm_move =dtopr_input("Would you like to move the file to the system directory?\n")
     if confirm_move.upper() in ("Y", "YES"):
         print("Moving the file...")
-        os.system(f"mv -i --backup=numbered {fname} {system_path}{fname}")
-
+        cmd = f"mv -i --backup=numbered {fname} {system_path}{fname}"
+        print(f"  {cmd}\n")
+        os.system(cmd)
 
 if __name__ == '__main__':
     main()
