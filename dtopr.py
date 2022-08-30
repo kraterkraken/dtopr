@@ -7,9 +7,21 @@
 
 import os
 import readline
+import signal
+import sys
 
 categories = ["<End Selection>", "AudioVideo", "Development", "Education", "Game", "Graphics",
                 "Network", "Office", "Science", "Settings", "System", "Utility"]
+
+def handle_ctrl_c(signal_number, stack_frame):
+    # Python note: I would like to offer the user a chance to cancel
+    # the ctrl-c termination of the program, but issuing a call to input()
+    # here causes the program to end ungracefully with a python callstack
+    # dump.  So I'm just exitting.
+    input()
+    sys.exit(1)
+
+signal.signal(signal.SIGINT, handle_ctrl_c)
 
 def make_title():
     os.system("clear")
@@ -29,8 +41,8 @@ def get_outfile(prompt):
 
         # handle existing file
         if os.path.exists(fname):
-            yesno = input(f"A file named {fname} already exists. Overwrite? ")
-            if not yesno.upper() in ["Y", "YES"]:
+            yesno = input(f"A file named {fname} already exists. Overwrite (y/n)? ")
+            if not yesno.upper() in ("Y", "YES"):
                 continue
 
         # try to create the file
