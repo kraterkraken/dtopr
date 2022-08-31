@@ -94,6 +94,13 @@ def get_multi_selection(prompt="", choicelist=[]):
                 retval += choicelist[i] + ";"
             return retval
 
+        # handle selection or de-selection of the item entered
+        if curr_choice in selecteds:
+            selecteds.remove(curr_choice)
+        else:
+            selecteds.append(curr_choice)
+
+
 def main():
     signal.signal(signal.SIGINT, handle_ctrl_c)
 
@@ -123,7 +130,7 @@ def main():
     system_path = "/usr/share/applications/"
     confirm_move =dtopr_input("Would you like to move the file to the system directory?\n")
     if confirm_move.upper() in ("Y", "YES"):
-        print("Moving the file...")
+        print("Moving the file...\n")
         cmd = f"mv -i --backup=numbered {fname} {system_path}{fname}"
         print(f"  {cmd}\n")
         os.system(cmd)
