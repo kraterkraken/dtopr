@@ -107,6 +107,7 @@ def main():
     (f,fname) = get_outfile("Enter the desktop file name (just the part before .desktop):\n")
 
     app_name = "Name=" + dtopr_input("Enter the name of the app as you'd like it to appear in the menus:\n")
+    app_comment = "Comment=" + dtopr_input("Enter a brief description of the app:\n")
     app_exec = "Exec=" + get_path("Enter the app's commandline command, including arguments:\n")
     app_path = "Path=" + get_path("Enter the working directory of the app (blank for current directory):\n")
     app_icon = "Icon=" + get_path("Enter the filename of the app's icon:\n")
@@ -120,6 +121,7 @@ def main():
     f.write("Type=Application\n")
     f.write(app_terminal + "\n")
     f.write(app_name + "\n")
+    f.write(app_comment + "\n")
     f.write(app_exec + "\n")
     f.write(app_path + "\n")
     f.write(app_icon + "\n")
