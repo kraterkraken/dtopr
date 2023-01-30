@@ -85,10 +85,7 @@ def get_multi_selection(prompt="", choicelist=[]):
             print(f"\t({i}) {asterisk}{item}")
 
         # sanity checks on the input
-        try:
-            curr_choice = int(input())
-        except ValueError:
-            curr_choice = -1
+        curr_choice = get_choice_int()
         if curr_choice < 0 or curr_choice > len(choicelist)-1:
             continue
 
@@ -104,6 +101,13 @@ def get_multi_selection(prompt="", choicelist=[]):
             selecteds.remove(curr_choice)
         else:
             selecteds.append(curr_choice)
+
+def get_choice_int():
+        try:
+            return int(input())
+        except ValueError:
+            return -1
+
 
 class DesktopFileData:
     def __init__(self):
@@ -136,6 +140,47 @@ class DesktopFileData:
         if val_name == "ALL" or val_name == "app_categories":
             self.app_categories = "Categories=" + get_multi_selection("Select one or more categories.  Select 0 when done.", categories)
 
+    def values_prompt(self):
+        print("Here are the desktop file entries you've created so far:")
+        print()
+        print("\t1.\t" + self.app_name)
+        print("\t2.\t" + self.app_comment)
+        print("\t3.\t" + self.app_exec)
+        print("\t4.\t" + self.app_path)
+        print("\t5.\t" + self.app_icon)
+        print("\t6.\t" + self.app_terminal)
+        print("\t7.\t" + self.app_categories)
+        print()
+        print("Select a number to change.  Select 0 to continue if you are happy with it the way it is.")
+
+    def review(self):
+        while True:
+            make_title()
+            self.values_prompt()
+            choice = get_choice_int()
+
+            # sanity check on input
+            if choice < 0 or choice > 7:
+                continue
+
+            # perform selection
+            if choice == 0:
+                return
+            elif choice == 1:
+                self.get_values("app_name")
+            elif choice == 2:
+                self.get_values("app_comment")
+            elif choice == 3:
+                self.get_values("app_exec")
+            elif choice == 4:
+                self.get_values("app_path")
+            elif choice == 5:
+                self.get_values("app_icon")
+            elif choice == 6:
+                self.get_values("app_terminal")
+            elif choice == 7:
+                self.get_values("app_categories")
+
 
 def main():
     signal.signal(signal.SIGINT, handle_ctrl_c)
@@ -144,6 +189,7 @@ def main():
     (f,fname) = get_outfile("Enter the desktop file name (just the part before .desktop):\n")
     data = DesktopFileData()
     data.get_values()
+    data.review()
 
     # write the data to the file
     f.write(data.header)
