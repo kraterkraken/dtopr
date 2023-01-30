@@ -143,15 +143,16 @@ class DesktopFileData:
     def values_prompt(self):
         print("Here are the desktop file entries you've created so far:")
         print()
-        print("\t1.\t" + self.app_name)
-        print("\t2.\t" + self.app_comment)
-        print("\t3.\t" + self.app_exec)
-        print("\t4.\t" + self.app_path)
-        print("\t5.\t" + self.app_icon)
-        print("\t6.\t" + self.app_terminal)
-        print("\t7.\t" + self.app_categories)
+        print("\t1. " + self.app_name)
+        print("\t2. " + self.app_comment)
+        print("\t3. " + self.app_exec)
+        print("\t4. " + self.app_path)
+        print("\t5. " + self.app_icon)
+        print("\t6. " + self.app_terminal)
+        print("\t7. " + self.app_categories)
         print()
-        print("Select a number to change.  Select 0 to continue if you are happy with it the way it is.")
+        print("Select a number to change.\n"
+            "Select 0 to continue if you are happy with it the way it is.")
 
     def review(self):
         while True:
