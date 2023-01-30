@@ -111,13 +111,13 @@ def get_choice_int():
 
 class DesktopFileData:
     def __init__(self):
-        self.app_name = "";
-        self.app_comment = "";
-        self.app_exec = "";
-        self.app_path = "";
-        self.app_icon = "";
-        self.app_terminal = "";
-        self.app_categories = "";
+        self.app_name = ""
+        self.app_comment = ""
+        self.app_exec = ""
+        self.app_path = ""
+        self.app_icon = ""
+        self.app_terminal = ""
+        self.app_categories = ""
         self.header = (
             "[Desktop Entry]\n"
             "Encoding=UTF-8\n"
