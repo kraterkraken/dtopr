@@ -13,6 +13,11 @@ import sys
 categories = ["<End Selection>", "AudioVideo", "Development", "Education", "Game", "Graphics",
                 "Network", "Office", "Science", "Settings", "System", "Utility"]
 
+values = {
+    "app_name": "",
+
+}
+
 def handle_ctrl_c(signal_number, stack_frame):
     # Python note: I would like to offer the user a chance to cancel
     # the ctrl-c termination of the program, but issuing a call to input()
@@ -100,32 +105,55 @@ def get_multi_selection(prompt="", choicelist=[]):
         else:
             selecteds.append(curr_choice)
 
+class DesktopFileData:
+    def __init__(self):
+        self.app_name = "";
+        self.app_comment = "";
+        self.app_exec = "";
+        self.app_path = "";
+        self.app_icon = "";
+        self.app_terminal = "";
+        self.app_categories = "";
+        self.header = (
+            "[Desktop Entry]\n"
+            "Encoding=UTF-8\n"
+            "Version=1.0\n"
+            "Type=Application\n")
+
+    def get_values(self, val_name="ALL"):
+        if val_name == "ALL" or val_name == "app_name":
+            self.app_name = "Name=" + dtopr_input("Enter the name of the app as you'd like it to appear in the menus:\n")
+        if val_name == "ALL" or val_name == "app_comment":
+            self.app_comment = "Comment=" + dtopr_input("Enter a brief description of the app:\n")
+        if val_name == "ALL" or val_name == "app_exec":
+            self.app_exec = "Exec=" + get_path("Enter the app's commandline command, including arguments:\n")
+        if val_name == "ALL" or val_name == "app_path":
+            self.app_path = "Path=" + get_path("Enter the working directory of the app (blank for current directory):\n")
+        if val_name == "ALL" or val_name == "app_icon":
+            self.app_icon = "Icon=" + get_path("Enter the filename of the app's icon:\n")
+        if val_name == "ALL" or val_name == "app_terminal":
+            self.app_terminal = "Terminal=" + get_bool("Will this be a terminal app (y/n)?\n")
+        if val_name == "ALL" or val_name == "app_categories":
+            self.app_categories = "Categories=" + get_multi_selection("Select one or more categories.  Select 0 when done.", categories)
+
 
 def main():
     signal.signal(signal.SIGINT, handle_ctrl_c)
 
+    # create the file and get all of the data from user input
     (f,fname) = get_outfile("Enter the desktop file name (just the part before .desktop):\n")
+    data = DesktopFileData()
+    data.get_values()
 
-    app_name = "Name=" + dtopr_input("Enter the name of the app as you'd like it to appear in the menus:\n")
-    app_comment = "Comment=" + dtopr_input("Enter a brief description of the app:\n")
-    app_exec = "Exec=" + get_path("Enter the app's commandline command, including arguments:\n")
-    app_path = "Path=" + get_path("Enter the working directory of the app (blank for current directory):\n")
-    app_icon = "Icon=" + get_path("Enter the filename of the app's icon:\n")
-    app_terminal = "Terminal=" + get_bool("Will this be a terminal app (y/n)?\n")
-    app_categories = "Categories=" + get_multi_selection("Select one or more categories.  Select 0 when done.", categories)
-
-    # write to the file
-    f.write("[Desktop Entry]\n")
-    f.write("Encoding=UTF-8\n")
-    f.write("Version=1.0\n")
-    f.write("Type=Application\n")
-    f.write(app_terminal + "\n")
-    f.write(app_name + "\n")
-    f.write(app_comment + "\n")
-    f.write(app_exec + "\n")
-    f.write(app_path + "\n")
-    f.write(app_icon + "\n")
-    f.write(app_categories + "\n")
+    # write the data to the file
+    f.write(data.header)
+    f.write(data.app_terminal + "\n")
+    f.write(data.app_name + "\n")
+    f.write(data.app_comment + "\n")
+    f.write(data.app_exec + "\n")
+    f.write(data.app_path + "\n")
+    f.write(data.app_icon + "\n")
+    f.write(data.app_categories + "\n")
     f.close()
 
     # offer to move the file to the proper linux system folder
