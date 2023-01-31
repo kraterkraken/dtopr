@@ -10,13 +10,22 @@ import readline
 import signal
 import sys
 
-categories = ["<End Selection>", "AudioVideo", "Development", "Education", "Game", "Graphics",
-                "Network", "Office", "Science", "Settings", "System", "Utility"]
 
-values = {
-    "app_name": "",
+# constants
+SECTIONS = [
+    "header",
+    "app_name",
+    "app_comment",
+    "app_exec",
+    "app_path",
+    "app_icon",
+    "app_terminal",
+    "app_categories"
+]
 
-}
+categories = ["<End Selection>", "AudioVideo", "Development", "Education", 
+                "Game", "Graphics", "Network", "Office", 
+                "Science", "Settings", "System", "Utility"]
 
 def handle_ctrl_c(signal_number, stack_frame):
     # Python note: I would like to offer the user a chance to cancel
@@ -167,40 +176,32 @@ class DesktopFileData:
             # perform selection
             if choice == 0:
                 return
-            elif choice == 1:
-                self.get_values("app_name")
-            elif choice == 2:
-                self.get_values("app_comment")
-            elif choice == 3:
-                self.get_values("app_exec")
-            elif choice == 4:
-                self.get_values("app_path")
-            elif choice == 5:
-                self.get_values("app_icon")
-            elif choice == 6:
-                self.get_values("app_terminal")
-            elif choice == 7:
-                self.get_values("app_categories")
+            else:
+                self.get_values(SECTIONS[choice]);
+
+    def write(self, f):
+        # write the data to the file f
+        f.write(self.header)
+        f.write(self.app_terminal + "\n")
+        f.write(self.app_name + "\n")
+        f.write(self.app_comment + "\n")
+        f.write(self.app_exec + "\n")
+        f.write(self.app_path + "\n")
+        f.write(self.app_icon + "\n")
+        f.write(self.app_categories + "\n")
+
 
 
 def main():
     signal.signal(signal.SIGINT, handle_ctrl_c)
 
-    # create the file and get all of the data from user input
+    # Create the file and get all of the data from user input, allow user to
+    # review their choices, then write everything to file.
     (f,fname) = get_outfile("Enter the desktop file name (just the part before .desktop):\n")
     data = DesktopFileData()
     data.get_values()
     data.review()
-
-    # write the data to the file
-    f.write(data.header)
-    f.write(data.app_terminal + "\n")
-    f.write(data.app_name + "\n")
-    f.write(data.app_comment + "\n")
-    f.write(data.app_exec + "\n")
-    f.write(data.app_path + "\n")
-    f.write(data.app_icon + "\n")
-    f.write(data.app_categories + "\n")
+    data.write(f)
     f.close()
 
     # offer to move the file to the proper linux system folder
