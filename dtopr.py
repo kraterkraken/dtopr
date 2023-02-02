@@ -65,7 +65,7 @@ def get_bool(prompt):
             return bools[response]
 
 def get_categories(prompt=""):
-    categories = ["<End Selection>", "AudioVideo", "Development", "Education", 
+    categories = ["AudioVideo", "Development", "Education", 
                 "Game", "Graphics", "Network", "Office", 
                 "Science", "Settings", "System", "Utility"]
     return get_multi_selection(prompt, categories)
@@ -80,11 +80,14 @@ def get_multi_selection(prompt="", choicelist=[]):
             asterisk = ""
             if i in selecteds:
                 asterisk = "* "
-            print(f"\t({i}) {asterisk}{item}")
+            print(f"\t({i+1}) {asterisk}{item}")
+
+        # get the user's selection - note that the selection is 1 to n
+        # but the list is indexed 0 to n-1
+        curr_choice = get_choice_int()
 
         # sanity checks on the input
-        curr_choice = get_choice_int()
-        if curr_choice < 0 or curr_choice > len(choicelist)-1:
+        if curr_choice < 0 or curr_choice > len(choicelist):
             continue
 
         # quit the loop and return the category string if user entered 0
@@ -95,10 +98,10 @@ def get_multi_selection(prompt="", choicelist=[]):
             return retval
 
         # handle selection or de-selection of the item entered
-        if curr_choice in selecteds:
-            selecteds.remove(curr_choice)
+        if (curr_choice-1) in selecteds:
+            selecteds.remove(curr_choice-1)
         else:
-            selecteds.append(curr_choice)
+            selecteds.append(curr_choice-1)
 
 def get_choice_int():
         try:
