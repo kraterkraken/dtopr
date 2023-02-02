@@ -10,23 +10,6 @@ import readline
 import signal
 import sys
 
-
-# constants
-SECTIONS = [
-    "header",
-    "app_name",
-    "app_comment",
-    "app_exec",
-    "app_path",
-    "app_icon",
-    "app_terminal",
-    "app_categories"
-]
-
-categories = ["<End Selection>", "AudioVideo", "Development", "Education", 
-                "Game", "Graphics", "Network", "Office", 
-                "Science", "Settings", "System", "Utility"]
-
 def handle_ctrl_c(signal_number, stack_frame):
     # Python note: I would like to offer the user a chance to cancel
     # the ctrl-c termination of the program, but issuing a call to input()
@@ -75,11 +58,17 @@ def get_path(prompt):
             errmsg = f"{retval} does not exist.\n"
 
 def get_bool(prompt):
-    values = {"Y": "true", "YES": "true", "N": "false", "NO": "false"}
+    bools = {"Y": "true", "YES": "true", "N": "false", "NO": "false"}
     while True:
         response = dtopr_input(prompt).upper()
-        if response in values.keys():
-            return values[response]
+        if response in bools.keys():
+            return bools[response]
+
+def get_categories(prompt=""):
+    categories = ["<End Selection>", "AudioVideo", "Development", "Education", 
+                "Game", "Graphics", "Network", "Office", 
+                "Science", "Settings", "System", "Utility"]
+    return get_multi_selection(prompt, categories)
 
 def get_multi_selection(prompt="", choicelist=[]):
     selecteds = []
@@ -120,45 +109,24 @@ def get_choice_int():
 
 class DesktopFileData:
     def __init__(self):
-        self.app_name = ""
-        self.app_comment = ""
-        self.app_exec = ""
-        self.app_path = ""
-        self.app_icon = ""
-        self.app_terminal = ""
-        self.app_categories = ""
+        self.input_manager = InputManager()
+        self.setup_prompts()
         self.header = (
             "[Desktop Entry]\n"
             "Encoding=UTF-8\n"
             "Version=1.0\n"
             "Type=Application\n")
 
-    def get_values(self, val_name="ALL"):
-        if val_name == "ALL" or val_name == "app_name":
-            self.app_name = "Name=" + dtopr_input("Enter the name of the app as you'd like it to appear in the menus:\n")
-        if val_name == "ALL" or val_name == "app_comment":
-            self.app_comment = "Comment=" + dtopr_input("Enter a brief description of the app:\n")
-        if val_name == "ALL" or val_name == "app_exec":
-            self.app_exec = "Exec=" + get_path("Enter the app's commandline command, including arguments:\n")
-        if val_name == "ALL" or val_name == "app_path":
-            self.app_path = "Path=" + get_path("Enter the working directory of the app (blank for current directory):\n")
-        if val_name == "ALL" or val_name == "app_icon":
-            self.app_icon = "Icon=" + get_path("Enter the filename of the app's icon:\n")
-        if val_name == "ALL" or val_name == "app_terminal":
-            self.app_terminal = "Terminal=" + get_bool("Will this be a terminal app (y/n)?\n")
-        if val_name == "ALL" or val_name == "app_categories":
-            self.app_categories = "Categories=" + get_multi_selection("Select one or more categories.  Select 0 when done.", categories)
+    def get_values(self, name="ALL"):
+        self.input_manager.get_input(name)
 
-    def values_prompt(self):
+    def review_prompt(self):
         print("Here are the desktop file entries you've created so far:")
         print()
-        print("\t(1) " + self.app_name)
-        print("\t(2) " + self.app_comment)
-        print("\t(3) " + self.app_exec)
-        print("\t(4) " + self.app_path)
-        print("\t(5) " + self.app_icon)
-        print("\t(6) " + self.app_terminal)
-        print("\t(7) " + self.app_categories)
+
+        for i, name in enumerate(self.input_manager.names):
+            str = self.input_manager.get_nameval_string(name)
+            print(f"\t({i+1}) {str}")
         print()
         print("Select a number to change.\n"
             "Select 0 to continue if you are happy with it the way it is.")
@@ -166,31 +134,64 @@ class DesktopFileData:
     def review(self):
         while True:
             make_title()
-            self.values_prompt()
+            self.review_prompt()
             choice = get_choice_int()
 
             # sanity check on input
-            if choice < 0 or choice > 7:
+            if choice < 0 or choice > len(self.input_manager.data):
                 continue
 
             # perform selection
             if choice == 0:
                 return
             else:
-                self.get_values(SECTIONS[choice]);
+                name = self.input_manager.names[choice-1]
+                self.get_values(name);
 
     def write(self, f):
         # write the data to the file f
         f.write(self.header)
-        f.write(self.app_terminal + "\n")
-        f.write(self.app_name + "\n")
-        f.write(self.app_comment + "\n")
-        f.write(self.app_exec + "\n")
-        f.write(self.app_path + "\n")
-        f.write(self.app_icon + "\n")
-        f.write(self.app_categories + "\n")
+        for name in self.input_manager.names:
+            str = self.input_manager.get_nameval_string(name)
+            f.write(f"{str}\n")
+
+    def setup_prompts(self):
+        self.input_manager.add("Name",       "Enter the name of the app as you'd like it to appear in the menus:\n", dtopr_input)
+        self.input_manager.add("Comment",    "Enter a brief description of the app:\n", dtopr_input)
+        self.input_manager.add("Exec",       "Enter the app's commandline command, including arguments:\n", get_path)
+        self.input_manager.add("Path",       "Enter the working directory of the app (blank for current directory):\n", get_path)
+        self.input_manager.add("Icon",       "Enter the filename of the app's icon:\n", get_path)
+        self.input_manager.add("Terminal",   "Will this be a terminal app (y/n)?\n", get_bool)
+        self.input_manager.add("Categories", "Select one or more categories.  Select 0 when done.", get_categories)
 
 
+#################################################################
+class InputData:
+    def __init__(self, name, prompt, input_func):
+        self.name = name
+        self.prompt = prompt
+        self.input_func = input_func
+        self.value = ""
+
+class InputManager:
+    def __init__(self):
+        # I'm keeping a dictionary of data, plus a parallel list of names,
+        # that way I can look up a name by index number, and then look up
+        # that name in the dictionary.  Seems messy.  Might not be the best way.
+        self.data = {}
+        self.names = []
+    def add(self, name, prompt, input_func):
+        newData = InputData(name, prompt, input_func)
+        self.data[name] = newData
+        self.names.append(name)
+    def get_input(self, name):
+        for elt in self.data.values():
+            if elt.name == name or name =="ALL":
+                value = elt.input_func(elt.prompt)
+                self.data[elt.name].value = value
+    def get_nameval_string(self, name):
+        return f"{name}={self.data[name].value}"
+#################################################################
 
 def main():
     signal.signal(signal.SIGINT, handle_ctrl_c)
